@@ -21,7 +21,6 @@ class RoleOrm(Base):
     role: Mapped[str] = mapped_column(String(length=20), unique=True, nullable=False)
 
 
-
 class TokenOrm(Base):
     __tablename__ = "tokens"
 
