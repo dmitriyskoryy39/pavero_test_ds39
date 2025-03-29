@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "pavero-test-ds39"
+version = "0.1.0"
+description = ""
+authors = ["Dmitriy <dmitry@nexly.app>"]
+readme = "README.md"
+packages = [{include = "pavero_test_ds39"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
