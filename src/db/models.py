@@ -11,6 +11,16 @@ class UserOrm(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True, index=True, nullable=False)
     username: Mapped[str] = mapped_column(String(length=320), unique=True, index=True, nullable=False)
 
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
+
+
+class RoleOrm(Base):
+    __tablename__ = "roles"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True, index=True, nullable=False)
+    role: Mapped[str] = mapped_column(String(length=20), unique=True, nullable=False)
+
+
 
 class TokenOrm(Base):
     __tablename__ = "tokens"
@@ -27,7 +37,7 @@ class AudioFileOrm(Base):
     __tablename__ = "audiofiles"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True, index=True, nullable=False)
-    title: Mapped[str] = mapped_column(String(length=320), unique=True, index=True, nullable=False)
+    title: Mapped[str] = mapped_column(String(length=320), nullable=False)
     path: Mapped[str] = mapped_column(nullable=False)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
