@@ -64,6 +64,7 @@ async def set_token(
 
 @app.get('/login_yandex')
 async def login():
-    url = 'https://oauth.yandex.ru/authorize?response_type=code&client_id=51f4ca6fb83a4b00bf01bd657328f518'
+    url = f'https://oauth.yandex.ru/authorize?response_type=code&client_id={settings.yandex_client_id}'
     return RedirectResponse(f"{url}")
+
 
