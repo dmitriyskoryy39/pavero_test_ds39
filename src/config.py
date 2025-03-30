@@ -12,6 +12,10 @@ class Settings(BaseSettings):
 
     POSTGRES_DSN: str
 
+    POSTGRES_DB: str
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+
 
 def get_settings():
     return Settings()
