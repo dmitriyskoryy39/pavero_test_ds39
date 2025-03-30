@@ -27,7 +27,7 @@ def _init_container() -> Container:
     settings = container.resolve(Settings)
 
     def init_async_session_factory() -> AsyncSessionFactory:
-        engine = create_async_engine(settings.DATABASE_URL)
+        engine = create_async_engine(settings.POSTGRES_DSN)
         async_session = async_sessionmaker(engine, expire_on_commit=False)
 
         return AsyncSessionFactory(async_session)
