@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     yandex_client_secret: str
     yandex_redirect_uri: str
 
-    DATABASE_URL: str
+    POSTGRES_DSN: str
 
 
 def get_settings():
