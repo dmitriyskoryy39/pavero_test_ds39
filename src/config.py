@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     yandex_client_id: str
     yandex_client_secret: str
     yandex_redirect_uri: str
+    yandex_user_info: str
+    yandex_authorize: str
+    yandex_token: str
 
     POSTGRES_DSN: str
 

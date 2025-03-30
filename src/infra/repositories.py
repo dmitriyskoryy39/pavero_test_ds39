@@ -2,8 +2,9 @@
 from abc import ABCMeta, abstractmethod
 
 from sqlalchemy import select
+from sqlalchemy.orm import load_only
 
-from src.infra.schemas import RoleAddSchema
+from src.infra.schemas import AudiofileRespSchema
 
 from src.db.models import (
     RoleOrm,
@@ -43,9 +44,9 @@ class RoleRepo(BaseSQLAlchemyRepo):
 
 
 class AudioFileRepo(BaseSQLAlchemyRepo):
-    async def add(self, title: str, path: str, user_id: int, session):
+    async def add(self, name: str, path: str, user_id: int, session):
         new_file = AudioFileOrm(
-            title=title,
+            title=name,
             path=path,
             user_id=user_id
         )
@@ -56,9 +57,12 @@ class AudioFileRepo(BaseSQLAlchemyRepo):
         ...
 
     async def get_by_id(self, user_id: int, session):
-        q = select(
-            AudioFileOrm.title,
-            AudioFileOrm.path
-        ).filter_by(user_id=user_id)
-        res = await session.execute(q)
-        return res.scalars().all()
+        query = (
+            select(AudioFileOrm)
+            .options(load_only(AudioFileOrm.title, AudioFileOrm.path))
+            .filter_by(user_id=user_id)
+        )
+        res = await session.scalars(query)
+        res_orm = res.all()
+        result = [AudiofileRespSchema.model_validate(row, from_attributes=True) for row in res_orm]
+        return result

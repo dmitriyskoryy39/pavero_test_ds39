@@ -1,17 +1,13 @@
 
 from contextlib import asynccontextmanager
 
-from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
-
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 
-Base: DeclarativeMeta = declarative_base()
-
-#
-# class Base(DeclarativeBase):
-#     pass
+class Base(DeclarativeBase):
+    pass
 
 
 class AsyncSessionFactory:

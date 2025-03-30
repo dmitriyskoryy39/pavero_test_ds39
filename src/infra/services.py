@@ -50,7 +50,7 @@ class FileService(BaseService):
     async def upload(
         self,
         uploaded_file: UploadFile,
-        title: str,
+        name: str,
         user_id: int
     ):
         try:
@@ -60,7 +60,7 @@ class FileService(BaseService):
                 await f.write(file.read())
 
             async with self.session_factory.get_session() as session:
-                res = await self.repo.add(title, str(filename), user_id, session)
+                res = await self.repo.add(name, str(filename), user_id, session)
                 await session.commit()
                 return res
         except Exception as e:
