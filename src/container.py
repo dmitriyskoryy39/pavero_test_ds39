@@ -9,9 +9,12 @@ from src.config import get_settings, Settings
 
 from src.db.core import AsyncSessionFactory
 
-from src.infra.services import RoleService
+from src.infra.services import RoleService, FileService
 
-from src.infra.repositories import RoleRepo
+from src.infra.repositories import (
+    RoleRepo,
+    AudioFileRepo
+)
 
 
 @lru_cache(1)
@@ -35,10 +38,18 @@ def _init_container() -> Container:
     def init_role_service() -> RoleService:
         return RoleService(RoleRepo(), init_async_session_factory())
 
+    def init_file_service() -> FileService:
+        return FileService(AudioFileRepo(), init_async_session_factory())
+
     #services
     container.register(
         RoleService,
         factory=init_role_service,
+        scope=Scope.singleton
+    )
+    container.register(
+        FileService,
+        factory=init_file_service,
         scope=Scope.singleton
     )
 
