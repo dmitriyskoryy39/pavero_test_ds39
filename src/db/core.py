@@ -1,5 +1,6 @@
 
-# from sqlalchemy.orm import DeclarativeBase
+from contextlib import asynccontextmanager
+
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,6 +19,7 @@ class AsyncSessionFactory:
     def __init__(self, async_session: async_sessionmaker):
         self.async_session = async_session
 
+    @asynccontextmanager
     async def get_session(self) -> AsyncSession:
         async with self.async_session() as session:
             yield session

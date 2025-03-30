@@ -28,8 +28,7 @@ class RoleRepo(BaseSQLAlchemyRepo):
     async def add(self, role: str, session):
         new_role = RoleOrm(role=role)
         session.add(new_role)
-        await session.commit()
-        return {"ok": True}
+        return new_role
 
     async def get_all(self, session):
         q = select(RoleOrm)

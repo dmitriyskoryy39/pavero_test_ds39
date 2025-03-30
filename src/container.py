@@ -9,9 +9,9 @@ from src.config import get_settings, Settings
 
 from src.db.core import AsyncSessionFactory
 
-from src.infra.repositories import (
-    RoleRepo,
-)
+from src.infra.services import RoleService
+
+from src.infra.repositories import RoleRepo
 
 
 @lru_cache(1)
@@ -32,10 +32,15 @@ def _init_container() -> Container:
 
         return AsyncSessionFactory(async_session)
 
-    container.register(AsyncSessionFactory, factory=init_async_session_factory, scope=Scope.singleton)
+    def init_role_service() -> RoleService:
+        return RoleService(RoleRepo(), init_async_session_factory())
 
-    #repositories
-    container.register(RoleRepo, instance=RoleRepo(), scope=Scope.singleton)
+    #services
+    container.register(
+        RoleService,
+        factory=init_role_service,
+        scope=Scope.singleton
+    )
 
     return container
 
