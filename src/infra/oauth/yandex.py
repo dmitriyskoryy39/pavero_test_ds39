@@ -9,8 +9,10 @@ from pydantic import BaseModel, ConfigDict
 
 from src.container import Container, init_container
 from src.config import Settings
-#
+
 from src.infra.services import LoginService
+
+from src.infra.schemas import AccessTokenSchema
 
 
 router = APIRouter()
@@ -27,21 +29,17 @@ class AuthorizationCodeSchema(BaseModel):
     model_config = ConfigDict(extra='ignore')
 
 
-class AccessTokenSchema(BaseModel):
-    access_token: str
-    refresh_token: str
-    expires_in: int
-
-    model_config = ConfigDict(extra='ignore')
-
-
 async def get_user_info(access_token: str):
     headers = {
         'Authorization': f'OAuth {access_token}'
     }
-    async with httpx.AsyncClient() as client:
-        res = await client.get(f'{settings.yandex_user_info}', headers=headers)
-        return res.json()
+    try:
+        async with httpx.AsyncClient() as client:
+            res = await client.get(f'{settings.yandex_user_info}', headers=headers)
+            return res.json()
+    except Exception as e:
+        print(e)
+    return HTTPException(status_code=401, detail='Unauthorized')
 
 
 @router.get('/token', include_in_schema=False)
@@ -65,14 +63,14 @@ async def set_token(
             res = await client.post(f'{settings.yandex_token}', headers=headers, data=data)
 
         if res.status_code == 200:
-            token = AccessTokenSchema(**dict(res.json()))
-            user = await get_user_info(token.access_token)
-            service.update(user.get('login'), token)
-            response.set_cookie(key='access_token', value=token.access_token, httponly=True)
+            token_data = AccessTokenSchema(**dict(res.json()))
+            user = await get_user_info(token_data.access_token)
+            await service.login(user.get('login'), token_data)
+            response.set_cookie(key='access_token', value=token_data.access_token, httponly=True)
         else:
             raise HTTPException(status_code=401, detail='Unauthorized')
     except Exception as e:
-        print(e)
+        print(f'{e=}')
 
 
 @router.get('/login_yandex', include_in_schema=False)
@@ -81,7 +79,7 @@ async def login():
     return RedirectResponse(f"{url}")
 
 
-@router.get('/check_token', include_in_schema=False)
+@router.get('/check_token')
 async def check_token(access_token: str):
     res = await get_user_info(access_token)
     return res

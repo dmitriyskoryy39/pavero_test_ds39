@@ -13,7 +13,7 @@ from src.db.models import (
     UserOrm
 )
 
-from src.infra.oauth.yandex import AccessTokenSchema
+from src.infra.schemas import AccessTokenSchema
 
 
 class BaseSQLAlchemyRepo(metaclass=ABCMeta):
@@ -45,9 +45,9 @@ class UserRepo(BaseSQLAlchemyRepo):
         return UserSchema.model_validate(res.one(), from_attributes=True)
 
     async def add(self):
-       ...
+        ...
 
-    async def get_all(self, session):
+    async def get_all(self):
         ...
 
     async def update(self):
@@ -94,7 +94,7 @@ class AudioFileRepo(BaseSQLAlchemyRepo):
         result = [AudiofileRespSchema.model_validate(row, from_attributes=True) for row in res_orm]
         return result
 
-    async def get_all(self, session):
+    async def get_all(self):
         ...
 
     async def update(self):
@@ -103,8 +103,22 @@ class AudioFileRepo(BaseSQLAlchemyRepo):
 
 class TokenRepo(BaseSQLAlchemyRepo):
     async def update(self, data: AccessTokenSchema, user_id: int, session):
-        user_token = session.get(TokenOrm, user_id)
-        user_token.access_token = data.access_token,
-        user_token.refresh_token = data.refresh_token,
-        user_token.expires_in = data.expires_in
-        return user_token
+        stmt = (
+            update(TokenOrm)
+            .where(TokenOrm.user_id == user_id)
+            .values(
+                access_token=data.access_token,
+                refresh_token=data.refresh_token,
+                expires_in=str(data.expires_in)
+            )
+        )
+        await session.execute(stmt)
+
+    async def get(self):
+        ...
+
+    async def get_all(self):
+        ...
+
+    async def add(self):
+        ...

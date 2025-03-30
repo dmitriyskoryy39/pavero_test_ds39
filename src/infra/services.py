@@ -11,7 +11,7 @@ from src.infra.repositories import BaseSQLAlchemyRepo
 
 from src.db.core import AsyncSessionFactory
 
-from src.infra.oauth.yandex import AccessTokenSchema
+from src.infra.schemas import AccessTokenSchema
 
 
 class BaseService(metaclass=ABCMeta):
@@ -82,12 +82,11 @@ class LoginService(BaseService):
         try:
             async with self.session_factory.get_session() as session:
                 repo_user = self.repo.get('UserRepo')
-                user = repo_user.get(login)
+                user = await repo_user.get(login, session)
                 if not user:
                     raise Exception
                 repo_token = self.repo.get('TokenRepo')
-                res = await repo_token.update(token_data, user.id, session)
+                await repo_token.update(token_data, user.id, session)
                 await session.commit()
-                return res.access_token
         except Exception as e:
             print(e)

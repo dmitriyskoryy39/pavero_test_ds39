@@ -10,21 +10,25 @@ from fastapi import (
 )
 
 from src.infra.services import (
-    # RoleService,
+    RoleService,
     FileService
 )
 
 from src.infra.schemas import AudiofileRespSchema
 
+from src.infra.api.dependencies import check_token_dep
+
 from src.container import Container, init_container
 
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(check_token_dep)]
+)
 
 
 container: Container = init_container()
 
-# RoleService = Annotated[RoleService, Depends(container.resolve(RoleService))]
+RoleService = Annotated[RoleService, Depends(container.resolve(RoleService))]
 FileService = Annotated[FileService, Depends(container.resolve(FileService))]
 
 
