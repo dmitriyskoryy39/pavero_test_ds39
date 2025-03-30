@@ -2,6 +2,12 @@
 from pydantic import BaseModel, ConfigDict
 
 
+class UserSchema(BaseModel):
+    id: int
+    username: str
+    role_id: int
+
+
 class RoleAddSchema(BaseModel):
     role: str
 

@@ -1,29 +1,57 @@
 
 from typing import Annotated
-from fastapi import APIRouter, Depends
 
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    UploadFile,
+    Query
+)
+
+from src.infra.services import (
+    # RoleService,
+    FileService
+)
+
+from src.infra.schemas import AudiofileRespSchema
 
 from src.container import Container, init_container
-from src.infra.repositories import RoleRepo
 
-from src.db.core import AsyncSessionFactory
-
-
-container: Container = init_container()
-async_session_factory = container.resolve(AsyncSessionFactory)
 
 router = APIRouter()
 
 
-Session = Annotated[AsyncSession, Depends(async_session_factory.get_session)]
 container: Container = init_container()
 
+# RoleService = Annotated[RoleService, Depends(container.resolve(RoleService))]
+FileService = Annotated[FileService, Depends(container.resolve(FileService))]
 
-@router.get('/get_all')
-async def get_all(session: Session):
-    repo = container.resolve(RoleRepo)
 
-    # session.add(new_role)
-    roles = await repo.get_all(session)
-    return roles
+@router.post('/upload_file')
+async def upload_file(
+        uploaded_file: UploadFile,
+        service: FileService,
+        name: str = Query(description='Имя файла'),
+):
+    try:
+        user_id = 1
+        result = await service.upload(uploaded_file, name, user_id)
+        return result
+    except Exception:
+        return HTTPException(status_code=400, detail='error upload')
+
+
+@router.get(
+    '/file_info',
+    response_model=list[AudiofileRespSchema]
+)
+async def upload_file(
+        user_id: int,
+        service: FileService):
+    try:
+        result = await service.get(user_id)
+        return result
+    except Exception:
+        return HTTPException(status_code=400, detail='error get file info')
+

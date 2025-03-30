@@ -11,9 +11,11 @@ from src.infra.repositories import BaseSQLAlchemyRepo
 
 from src.db.core import AsyncSessionFactory
 
+from src.infra.oauth.yandex import AccessTokenSchema
+
 
 class BaseService(metaclass=ABCMeta):
-    def __init__(self, repo: BaseSQLAlchemyRepo, session_factory: AsyncSessionFactory):
+    def __init__(self, repo: BaseSQLAlchemyRepo | dict, session_factory: AsyncSessionFactory):
         self.repo = repo
         self.session_factory = session_factory
 
@@ -66,10 +68,26 @@ class FileService(BaseService):
         except Exception as e:
             print(e)
 
-    async def get_by_id(self, user_id: int):
+    async def get(self, user_id: int):
         try:
             async with self.session_factory.get_session() as session:
-                res = await self.repo.get_by_id(user_id, session)
+                res = await self.repo.get(user_id, session)
                 return res
+        except Exception as e:
+            print(e)
+
+
+class LoginService(BaseService):
+    async def login(self, login: str, token_data: AccessTokenSchema):
+        try:
+            async with self.session_factory.get_session() as session:
+                repo_user = self.repo.get('UserRepo')
+                user = repo_user.get(login)
+                if not user:
+                    raise Exception
+                repo_token = self.repo.get('TokenRepo')
+                res = await repo_token.update(token_data, user.id, session)
+                await session.commit()
+                return res.access_token
         except Exception as e:
             print(e)
