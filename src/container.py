@@ -45,7 +45,11 @@ def _init_container() -> Container:
         return RoleService(RoleRepo(), init_async_session_factory())
 
     def init_file_service() -> FileService:
-        return FileService(AudioFileRepo(), init_async_session_factory())
+        repos = {
+            'AudioFileRepo': AudioFileRepo(),
+            'UserRepo': UserRepo()
+        }
+        return FileService(repos, init_async_session_factory())
 
     def init_login_service() -> LoginService:
         repos = {

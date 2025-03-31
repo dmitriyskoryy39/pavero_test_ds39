@@ -12,7 +12,7 @@ from src.config import Settings
 
 from src.infra.services import LoginService
 
-from src.infra.schemas import AccessTokenSchema
+from src.infra.schemas import AccessTokenSchemaDTO, AuthorizationCodeSchema
 
 
 router = APIRouter()
@@ -21,12 +21,6 @@ container: Container = init_container()
 settings: Settings = container.resolve(Settings)
 
 LoginService = Annotated[LoginService, Depends(container.resolve(LoginService))]
-
-
-class AuthorizationCodeSchema(BaseModel):
-    code: str
-
-    model_config = ConfigDict(extra='ignore')
 
 
 async def get_user_info(access_token: str):
@@ -63,7 +57,7 @@ async def set_token(
             res = await client.post(f'{settings.yandex_token}', headers=headers, data=data)
 
         if res.status_code == 200:
-            token_data = AccessTokenSchema(**dict(res.json()))
+            token_data = AccessTokenSchemaDTO(**dict(res.json()))
             user = await get_user_info(token_data.access_token)
             await service.login(user.get('login'), token_data)
             response.set_cookie(key='access_token', value=token_data.access_token, httponly=True)
@@ -79,7 +73,7 @@ async def login():
     return RedirectResponse(f"{url}")
 
 
-@router.get('/check_token')
+@router.get('/check_token', include_in_schema=False)
 async def check_token(access_token: str):
     res = await get_user_info(access_token)
     return res

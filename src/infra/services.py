@@ -11,7 +11,7 @@ from src.infra.repositories import BaseSQLAlchemyRepo
 
 from src.db.core import AsyncSessionFactory
 
-from src.infra.schemas import AccessTokenSchema
+from src.infra.schemas import AccessTokenSchemaDTO, UserLoginDTO
 
 
 class BaseService(metaclass=ABCMeta):
@@ -53,7 +53,7 @@ class FileService(BaseService):
         self,
         uploaded_file: UploadFile,
         name: str,
-        user_id: int
+        user: UserLoginDTO
     ):
         try:
             file = uploaded_file.file
@@ -62,23 +62,30 @@ class FileService(BaseService):
                 await f.write(file.read())
 
             async with self.session_factory.get_session() as session:
-                res = await self.repo.add(name, str(filename), user_id, session)
+                repo_user = self.repo.get('UserRepo')
+                user_id = await repo_user.get(user.login, session)
+                repo_audio = self.repo.get('AudioFileRepo')
+                res = await repo_audio.add(name=name, path=str(filename), user_id=user_id.id, session=session)
                 await session.commit()
                 return res
         except Exception as e:
             print(e)
 
-    async def get(self, user_id: int):
+    async def get(self, user: UserLoginDTO):
         try:
+            print(user)
             async with self.session_factory.get_session() as session:
-                res = await self.repo.get(user_id, session)
+                repo_user = self.repo.get('UserRepo')
+                user_id = await repo_user.get(user.login, session)
+                repo_audio = self.repo.get('AudioFileRepo')
+                res = await repo_audio.get(user_id.id, session)
                 return res
         except Exception as e:
             print(e)
 
 
 class LoginService(BaseService):
-    async def login(self, login: str, token_data: AccessTokenSchema):
+    async def login(self, login: str, token_data: AccessTokenSchemaDTO):
         try:
             async with self.session_factory.get_session() as session:
                 repo_user = self.repo.get('UserRepo')

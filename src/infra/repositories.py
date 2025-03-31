@@ -13,7 +13,7 @@ from src.db.models import (
     UserOrm
 )
 
-from src.infra.schemas import AccessTokenSchema
+from src.infra.schemas import AccessTokenSchemaDTO
 
 
 class BaseSQLAlchemyRepo(metaclass=ABCMeta):
@@ -102,7 +102,7 @@ class AudioFileRepo(BaseSQLAlchemyRepo):
 
 
 class TokenRepo(BaseSQLAlchemyRepo):
-    async def update(self, data: AccessTokenSchema, user_id: int, session):
+    async def update(self, data: AccessTokenSchemaDTO, user_id: int, session):
         stmt = (
             update(TokenOrm)
             .where(TokenOrm.user_id == user_id)
