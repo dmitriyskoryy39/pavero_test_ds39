@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16-alpine
+    shm_size: 1g
+    container_name: db_dev
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - 'pgdata:/var/lib/postgresql/data'
+    ports:
+      - 5432:5432
+    networks:
+      - test39
+
+  asgi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    hostname: asgi
+    stdin_open: true
+    ports:
+      - '8008:8008'
+    volumes:
+      - ./src:/app/src
+    command: bash -c "
+      alembic upgrade b3627babe6c7 &&
+      uvicorn src.main:app --workers 4 --host 0.0.0.0 --port 8008 --reload"
+
+    depends_on:
+      - db
+    networks:
+      - test39
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  test39:
+    driver: bridge
