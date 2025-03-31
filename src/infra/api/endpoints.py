@@ -10,11 +10,10 @@ from fastapi import (
 )
 
 from src.infra.services import (
-    RoleService,
     FileService
 )
 
-from src.infra.schemas import AudiofileRespSchema, UserLoginDTO
+from src.infra.schemas import UserLoginDTO
 
 from src.infra.api.dependencies import check_token_dep
 
@@ -26,7 +25,6 @@ router = APIRouter()
 
 container: Container = init_container()
 
-RoleService = Annotated[RoleService, Depends(container.resolve(RoleService))]
 FileService = Annotated[FileService, Depends(container.resolve(FileService))]
 
 
@@ -46,7 +44,6 @@ async def upload_file(
 
 @router.get(
     '/file_info',
-    # response_model=list[AudiofileRespSchema]
 )
 async def upload_file(
     service: FileService,

@@ -11,15 +11,6 @@ class UserOrm(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True, index=True, nullable=False)
     username: Mapped[str] = mapped_column(String(length=320), unique=True, index=True, nullable=False)
 
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
-
-
-class RoleOrm(Base):
-    __tablename__ = "roles"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True, index=True, nullable=False)
-    role: Mapped[str] = mapped_column(String(length=20), unique=True, nullable=False)
-
 
 class TokenOrm(Base):
     __tablename__ = "tokens"
@@ -27,7 +18,7 @@ class TokenOrm(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True, index=True, nullable=False)
     access_token: Mapped[str] = mapped_column(unique=True, nullable=False)
     refresh_token: Mapped[str] = mapped_column(unique=True, nullable=False)
-    expires_in: Mapped[str] = mapped_column(unique=True, nullable=False)
+    expires_in: Mapped[int] = mapped_column(unique=True, nullable=False)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
 

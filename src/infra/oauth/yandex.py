@@ -5,8 +5,6 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends, Response
 from fastapi.responses import RedirectResponse
 
-from pydantic import BaseModel, ConfigDict
-
 from src.container import Container, init_container
 from src.config import Settings
 

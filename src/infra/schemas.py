@@ -17,7 +17,6 @@ class UserLoginDTO(BaseModel):
 class UserSchema(BaseModel):
     id: int
     username: str
-    role_id: int
 
 
 class RoleAddSchema(BaseModel):

@@ -10,13 +10,11 @@ from src.config import get_settings, Settings
 from src.db.core import AsyncSessionFactory
 
 from src.infra.services import (
-    RoleService,
     FileService,
     LoginService
 )
 
 from src.infra.repositories import (
-    RoleRepo,
     AudioFileRepo,
     TokenRepo,
     UserRepo
@@ -41,9 +39,6 @@ def _init_container() -> Container:
 
         return AsyncSessionFactory(async_session)
 
-    def init_role_service() -> RoleService:
-        return RoleService(RoleRepo(), init_async_session_factory())
-
     def init_file_service() -> FileService:
         repos = {
             'AudioFileRepo': AudioFileRepo(),
@@ -60,11 +55,6 @@ def _init_container() -> Container:
 
 
     #services
-    container.register(
-        RoleService,
-        factory=init_role_service,
-        scope=Scope.singleton
-    )
     container.register(
         FileService,
         factory=init_file_service,

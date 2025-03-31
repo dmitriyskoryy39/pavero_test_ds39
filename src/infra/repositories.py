@@ -7,7 +7,6 @@ from sqlalchemy.orm import load_only
 from src.infra.schemas import AudiofileRespSchema, UserSchema
 
 from src.db.models import (
-    RoleOrm,
     AudioFileOrm,
     TokenOrm,
     UserOrm
@@ -41,32 +40,23 @@ class UserRepo(BaseSQLAlchemyRepo):
             select(UserOrm)
             .filter_by(username=username)
         )
-        res = await session.scalars(query)
-        return UserSchema.model_validate(res.one(), from_attributes=True)
+        user = await session.execute(query)
+        try:
+            result = user.scalars().one()
+            return UserSchema.model_validate(result, from_attributes=True)
+        except:
+            return None
 
-    async def add(self):
-        ...
+    async def add(self, username: str, session):
+        new_user = UserOrm(
+            username=username,
+        )
+        session.add(new_user)
+        await session.flush()
+        await session.refresh(new_user)
+        return new_user
 
     async def get_all(self):
-        ...
-
-    async def update(self):
-        ...
-
-
-class RoleRepo(BaseSQLAlchemyRepo):
-
-    async def add(self, role: str, session):
-        new_role = RoleOrm(role=role)
-        session.add(new_role)
-        return new_role
-
-    async def get_all(self, session):
-        q = select(RoleOrm)
-        res = await session.execute(q)
-        return res.scalars().all()
-
-    async def get(self):
         ...
 
     async def update(self):
@@ -109,10 +99,19 @@ class TokenRepo(BaseSQLAlchemyRepo):
             .values(
                 access_token=data.access_token,
                 refresh_token=data.refresh_token,
-                expires_in=str(data.expires_in)
+                expires_in=data.expires_in
             )
         )
         await session.execute(stmt)
+
+    async def add(self, data: AccessTokenSchemaDTO, user_id: int, session):
+        new_token = TokenOrm(
+            access_token=data.access_token,
+            refresh_token=data.refresh_token,
+            expires_in=data.expires_in,
+            user_id=user_id
+        )
+        session.add(new_token)
 
     async def get(self):
         ...
@@ -120,5 +119,5 @@ class TokenRepo(BaseSQLAlchemyRepo):
     async def get_all(self):
         ...
 
-    async def add(self):
-        ...
+
+

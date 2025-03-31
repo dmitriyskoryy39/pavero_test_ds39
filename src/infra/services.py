@@ -23,25 +23,6 @@ class BaseService(metaclass=ABCMeta):
         return self
 
 
-class RoleService(BaseService):
-    async def add(self, role: str):
-        try:
-            async with self.session_factory.get_session() as session:
-                res = await self.repo.add(role, session)
-                await session.commit()
-                return res
-        except Exception as e:
-            print(e)
-
-    async def get_all(self):
-        try:
-            async with self.session_factory.get_session() as session:
-                res = await self.repo.get_all(session)
-                return res
-        except Exception as e:
-            print(e)
-
-
 class FileService(BaseService):
 
     @property
@@ -73,13 +54,15 @@ class FileService(BaseService):
 
     async def get(self, user: UserLoginDTO):
         try:
-            print(user)
             async with self.session_factory.get_session() as session:
                 repo_user = self.repo.get('UserRepo')
-                user_id = await repo_user.get(user.login, session)
                 repo_audio = self.repo.get('AudioFileRepo')
-                res = await repo_audio.get(user_id.id, session)
-                return res
+
+                user = await repo_user.get(user.login, session)
+                if user:
+                    res = await repo_audio.get(user.id, session)
+                    return res
+                return None
         except Exception as e:
             print(e)
 
@@ -89,11 +72,16 @@ class LoginService(BaseService):
         try:
             async with self.session_factory.get_session() as session:
                 repo_user = self.repo.get('UserRepo')
-                user = await repo_user.get(login, session)
-                if not user:
-                    raise Exception
                 repo_token = self.repo.get('TokenRepo')
-                await repo_token.update(token_data, user.id, session)
+
+                user = await repo_user.get(login, session)
+                if user:
+                    await repo_token.update(token_data, user.id, session)
+                    await session.commit()
+                    return
+                user = await repo_user.add(login, session)
+                await repo_token.add(token_data, user.id, session)
                 await session.commit()
         except Exception as e:
             print(e)
+
